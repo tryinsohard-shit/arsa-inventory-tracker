@@ -38,12 +38,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
+    console.log("[v0] Login attempt:", { email, password })
+
     // Simple authentication - in real app, this would be server-side
     const users = dataStore.getUsers()
+    console.log("[v0] Available users:", users)
+
     const foundUser = users.find((u) => u.email === email)
+    console.log("[v0] Found user:", foundUser)
 
     if (foundUser && password === "password123") {
       // Demo password
+      console.log("[v0] Login successful")
       setUser(foundUser)
       dataStore.setCurrentUser(foundUser)
       localStorage.setItem("inventory-user", JSON.stringify(foundUser))
@@ -51,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true
     }
 
+    console.log("[v0] Login failed - invalid credentials")
     setIsLoading(false)
     return false
   }

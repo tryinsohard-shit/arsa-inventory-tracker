@@ -90,10 +90,10 @@ export function LoginForm() {
             <p className="text-sm font-medium text-muted-foreground mb-2">Demo Accounts:</p>
             <div className="space-y-1 text-xs text-muted-foreground">
               <p>
-                <strong>Admin:</strong> adminarsa@company.com
+                <strong>Admin:</strong> adminarsa@clientname.com
               </p>
               <p>
-                <strong>Staff:</strong> john.doe@company.com
+                <strong>Staff:</strong> staff1@clientname.com
               </p>
               <p>
                 <strong>Password:</strong> password123
