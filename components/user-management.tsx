@@ -19,27 +19,35 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trash2, Edit2, Plus, Mail, UserIcon, Key } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
+import { useDepartments } from "@/hooks/use-departments"
 import { dataStore } from "@/lib/data-store"
 import { generateTemporaryPassword } from "@/lib/password-utils"
 import type { User } from "@/lib/types"
 
 export function UserManagement() {
   const { users, isLoading, error, addUser, updateUser, deleteUser } = useUsers()
+  const { departments, subDepartments: allSubDepartments } = useDepartments()
   const [isOpen, setIsOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [showPasswordReset, setShowPasswordReset] = useState<string | null>(null)
   const [newPassword, setNewPassword] = useState("")
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    email: string
+    name: string
+    role: "admin" | "manager" | "staff" | "viewer"
+    departmentId: string
+    subDepartmentId: string
+    password: string
+  }>({
     email: "",
     name: "",
-    role: "staff" as const,
+    role: "staff",
     departmentId: "",
     subDepartmentId: "",
     password: "",
   })
 
-  const departments = dataStore.getDepartments()
-  const subDepartments = dataStore.getSubDepartments(formData.departmentId)
+  const subDepartments = allSubDepartments.filter((sd) => sd.departmentId === formData.departmentId)
 
   const handleOpenDialog = (user?: User) => {
     if (user) {
@@ -111,7 +119,10 @@ export function UserManagement() {
           subDepartmentId: formData.subDepartmentId,
           department: departments.find((d) => d.id === formData.departmentId)?.name,
         })
-        dataStore.setUserPassword(newUser.id, formData.password)
+        // Only set password if user was created successfully (has UUID, not temporary ID)
+        if (newUser && !newUser.id.startsWith("user-")) {
+          await dataStore.setUserPassword(newUser.id, formData.password)
+        }
       }
       handleCloseDialog()
     } catch (err) {
@@ -119,16 +130,20 @@ export function UserManagement() {
     }
   }
 
-  const handlePasswordReset = (userId: string) => {
+  const handlePasswordReset = async (userId: string) => {
     if (!newPassword) {
       alert("Please enter a new password")
       return
     }
 
-    dataStore.setUserPassword(userId, newPassword)
-    alert("Password reset successfully!")
-    setShowPasswordReset(null)
-    setNewPassword("")
+    const success = await dataStore.setUserPassword(userId, newPassword)
+    if (success) {
+      alert("Password reset successfully!")
+      setShowPasswordReset(null)
+      setNewPassword("")
+    } else {
+      alert("Failed to reset password. Please try again.")
+    }
   }
 
   const handleDelete = async (userId: string) => {

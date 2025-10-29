@@ -58,19 +58,75 @@ class DataStore {
     }
   }
 
-  addUser(user: Omit<User, "id" | "createdAt" | "passwordHash">): User {
+  async addUser(user: Omit<User, "id" | "createdAt" | "passwordHash">): Promise<User> {
+    try {
+      // Insert to Supabase
+      const { data, error } = await supabase
+        .from("users")
+        .insert([
+          {
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            department_id: user.departmentId,
+            sub_department_id: user.subDepartmentId,
+            is_active: true,
+          },
+        ])
+        .select()
+
+      if (error) throw error
+
+      if (data && data[0]) {
+        const newUser: User = {
+          id: data[0].id,
+          email: data[0].email,
+          name: data[0].name,
+          role: data[0].role,
+          departmentId: data[0].department_id,
+          subDepartmentId: data[0].sub_department_id,
+          passwordHash: "",
+          createdAt: new Date(data[0].created_at),
+        }
+        this.users.push(newUser)
+        this.addAuditLog("user", newUser.id, "user_created", { user: newUser })
+        return newUser
+      }
+    } catch (error: any) {
+      console.error("[v0] Error adding user to Supabase:", error)
+      console.error("[v0] Error details:", error.message || error)
+    }
+
+    // Fallback to local storage if Supabase fails
     const newUser: User = {
       ...user,
       id: `user-${Date.now()}`,
       createdAt: new Date(),
-      passwordHash: "", // Will be set separately
+      passwordHash: "",
     }
     this.users.push(newUser)
     this.addAuditLog("user", newUser.id, "user_created", { user: newUser })
     return newUser
   }
 
-  updateUser(id: string, updates: Partial<User>): User | null {
+  async updateUser(id: string, updates: Partial<User>): Promise<User | null> {
+    try {
+      // Update in Supabase
+      const supabaseUpdates: any = {}
+      if (updates.email) supabaseUpdates.email = updates.email
+      if (updates.name) supabaseUpdates.name = updates.name
+      if (updates.role) supabaseUpdates.role = updates.role
+      if (updates.departmentId !== undefined) supabaseUpdates.department_id = updates.departmentId
+      if (updates.subDepartmentId !== undefined) supabaseUpdates.sub_department_id = updates.subDepartmentId
+
+      const { error } = await supabase.from("users").update(supabaseUpdates).eq("id", id)
+
+      if (error) throw error
+    } catch (error) {
+      console.error("[v0] Error updating user in Supabase:", error)
+    }
+
+    // Update local memory
     const index = this.users.findIndex((user) => user.id === id)
     if (index === -1) return null
 
@@ -83,7 +139,17 @@ class DataStore {
     return updatedUser
   }
 
-  deleteUser(id: string): boolean {
+  async deleteUser(id: string): Promise<boolean> {
+    try {
+      // Delete from Supabase
+      const { error } = await supabase.from("users").delete().eq("id", id)
+
+      if (error) throw error
+    } catch (error) {
+      console.error("[v0] Error deleting user from Supabase:", error)
+    }
+
+    // Delete from local memory
     const index = this.users.findIndex((user) => user.id === id)
     if (index === -1) return false
 
@@ -101,13 +167,31 @@ class DataStore {
   }
 
   // Password management
-  setUserPassword(userId: string, password: string): boolean {
-    const user = this.users.find((u) => u.id === userId)
-    if (!user) return false
-
-    user.passwordHash = hashPassword(password)
-    this.addAuditLog("user", userId, "password_changed", {})
-    return true
+  async setUserPassword(userId: string, password: string): Promise<boolean> {
+    try {
+      const passwordHash = hashPassword(password)
+      
+      // Update in Supabase
+      const { error } = await supabase
+        .from("users")
+        .update({ password_hash: passwordHash })
+        .eq("id", userId)
+      
+      if (error) throw error
+      
+      // Update local memory
+      const user = this.users.find((u) => u.id === userId)
+      if (user) {
+        user.passwordHash = passwordHash
+      }
+      
+      this.addAuditLog("user", userId, "password_changed", {})
+      return true
+    } catch (error: any) {
+      console.error("[v0] Error updating password:", error)
+      console.error("[v0] Error details:", error.message || error)
+      return false
+    }
   }
 
   getUserPasswordHash(userId: string): string | undefined {

@@ -56,11 +56,15 @@ export function ChangePassword() {
         return
       }
 
-      dataStore.setUserPassword(user.id, newPassword)
-      setMessage("Password changed successfully!")
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
+      const success = await dataStore.setUserPassword(user.id, newPassword)
+      if (success) {
+        setMessage("Password changed successfully!")
+        setCurrentPassword("")
+        setNewPassword("")
+        setConfirmPassword("")
+      } else {
+        setError("Failed to change password")
+      }
     } catch (err) {
       setError("Failed to change password")
       console.error(err)

@@ -23,7 +23,7 @@ export function useUsers() {
           throw new Error("Email already exists")
         }
 
-        const newUser = dataStore.addUser(user)
+        const newUser = await dataStore.addUser(user)
         refreshUsers()
         return newUser
       } catch (err) {
@@ -42,7 +42,7 @@ export function useUsers() {
       setIsLoading(true)
       setError(null)
       try {
-        const updatedUser = dataStore.updateUser(id, updates)
+        const updatedUser = await dataStore.updateUser(id, updates)
         if (!updatedUser) {
           throw new Error("User not found")
         }
@@ -64,7 +64,7 @@ export function useUsers() {
       setIsLoading(true)
       setError(null)
       try {
-        const success = dataStore.deleteUser(id)
+        const success = await dataStore.deleteUser(id)
         if (!success) {
           throw new Error("User not found")
         }

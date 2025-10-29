@@ -16,9 +16,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Trash2, Edit2, Plus, Mail, UserIcon } from "lucide-react"
+import { Trash2, Edit2, Plus, Mail, UserIcon, Key } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
 import { dataStore } from "@/lib/data-store"
+import { generateTemporaryPassword } from "@/lib/password-utils"
 import type { User } from "@/lib/types"
 
 interface DepartmentUserManagementProps {
@@ -29,17 +30,30 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
   const { users, isLoading, error, addUser, updateUser, deleteUser } = useUsers()
   const [isOpen, setIsOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [formData, setFormData] = useState({
+  const [showPasswordReset, setShowPasswordReset] = useState<string | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [formData, setFormData] = useState<{
+    email: string
+    name: string
+    role: "staff" | "viewer"
+    subDepartmentId: string
+  }>({
     email: "",
     name: "",
-    role: "staff" as const,
+    role: "staff",
     subDepartmentId: "",
   })
 
   const departments = dataStore.getDepartments()
   const subDepartments = dataStore.getSubDepartments(currentUser.departmentId || "")
 
-  const departmentUsers = users.filter((u) => u.departmentId === currentUser.departmentId)
+  // Manager can only see/manage staff and viewers in their department, NOT admins or other managers
+  const departmentUsers = users.filter(
+    (u) =>
+      u.departmentId === currentUser.departmentId &&
+      u.role !== "admin" &&
+      u.role !== "manager",
+  )
 
   const handleOpenDialog = (user?: User) => {
     if (user) {
@@ -47,7 +61,7 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
       setFormData({
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: user.role as "staff" | "viewer", // Manager can only edit staff/viewer
         subDepartmentId: user.subDepartmentId || "",
       })
     } else {
@@ -106,6 +120,22 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
       handleCloseDialog()
     } catch (err) {
       console.error("Error saving user:", err)
+    }
+  }
+
+  const handlePasswordReset = async (userId: string) => {
+    if (!newPassword) {
+      alert("Please enter a new password")
+      return
+    }
+
+    const success = await dataStore.setUserPassword(userId, newPassword)
+    if (success) {
+      alert("Password reset successfully!")
+      setShowPasswordReset(null)
+      setNewPassword("")
+    } else {
+      alert("Failed to reset password. Please try again.")
     }
   }
 
@@ -291,6 +321,49 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
                       <Edit2 className="h-3 w-3" />
                       Edit
                     </Button>
+                    <Dialog
+                      open={showPasswordReset === user.id}
+                      onOpenChange={(open) => setShowPasswordReset(open ? user.id : null)}
+                    >
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="flex-1 flex items-center gap-2 bg-transparent">
+                          <Key className="h-3 w-3" />
+                          Reset Password
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Reset Password for {user.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="new-password">New Password</Label>
+                            <Input
+                              id="new-password"
+                              type="text"
+                              placeholder="Enter new password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setNewPassword(generateTemporaryPassword())}
+                          >
+                            Generate Password
+                          </Button>
+                          <div className="flex gap-2">
+                            <Button onClick={() => handlePasswordReset(user.id)} className="flex-1">
+                              Reset Password
+                            </Button>
+                            <Button variant="outline" onClick={() => setShowPasswordReset(null)} className="flex-1">
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant="outline"
                       size="sm"
