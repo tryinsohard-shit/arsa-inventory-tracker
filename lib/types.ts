@@ -2,8 +2,11 @@ export interface User {
   id: string
   email: string
   name: string
-  role: "admin" | "staff" | "viewer"
+  role: "admin" | "staff" | "viewer" | "manager"
   department?: string
+  departmentId?: string
+  subDepartmentId?: string
+  passwordHash?: string
   createdAt: Date
 }
 
@@ -26,6 +29,8 @@ export interface BorrowRequest {
   id: string
   itemId: string
   borrowerId: string
+  departmentId?: string
+  subDepartmentId?: string
   requestedDate: Date
   expectedReturnDate: Date
   actualReturnDate?: Date
@@ -55,4 +60,22 @@ export interface DashboardStats {
   borrowedItems: number
   pendingRequests: number
   overdueItems: number
+}
+
+export interface Department {
+  id: string
+  name: string
+  description?: string
+  parentDepartmentId?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SubDepartment {
+  id: string
+  name: string
+  departmentId: string
+  description?: string
+  createdAt: Date
+  updatedAt: Date
 }

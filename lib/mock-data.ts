@@ -1,4 +1,78 @@
-import type { User, InventoryItem, BorrowRequest } from "./types"
+import type { User, InventoryItem, BorrowRequest, Department, SubDepartment } from "./types"
+
+export const mockDepartments: Department[] = [
+  {
+    id: "dept-1",
+    name: "IT Department",
+    description: "Information Technology",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "dept-2",
+    name: "Operations",
+    description: "Operations and Logistics",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "dept-3",
+    name: "Finance",
+    description: "Finance and Accounting",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "dept-4",
+    name: "Marketing",
+    description: "Marketing and Communications",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+]
+
+export const mockSubDepartments: SubDepartment[] = [
+  {
+    id: "subdept-1",
+    name: "Infrastructure",
+    departmentId: "dept-1",
+    description: "IT Infrastructure and Support",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "subdept-2",
+    name: "Development",
+    departmentId: "dept-1",
+    description: "Software Development",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "subdept-3",
+    name: "Logistics",
+    departmentId: "dept-2",
+    description: "Logistics and Supply Chain",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "subdept-4",
+    name: "Accounting",
+    departmentId: "dept-3",
+    description: "Accounting and Reporting",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+  {
+    id: "subdept-5",
+    name: "Digital Marketing",
+    departmentId: "dept-4",
+    description: "Digital Marketing and Social Media",
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+  },
+]
 
 export const mockUsers: User[] = [
   {
@@ -7,6 +81,8 @@ export const mockUsers: User[] = [
     name: "Administrator",
     role: "admin",
     department: "IT",
+    departmentId: "dept-1",
+    subDepartmentId: "subdept-1",
     createdAt: new Date("2024-01-01"),
   },
   {
@@ -15,6 +91,8 @@ export const mockUsers: User[] = [
     name: "Staff Member 1",
     role: "staff",
     department: "Operations",
+    departmentId: "dept-2",
+    subDepartmentId: "subdept-3",
     createdAt: new Date("2024-01-15"),
   },
   {
@@ -23,6 +101,8 @@ export const mockUsers: User[] = [
     name: "Staff Member 2",
     role: "staff",
     department: "Finance",
+    departmentId: "dept-3",
+    subDepartmentId: "subdept-4",
     createdAt: new Date("2024-02-01"),
   },
 ]

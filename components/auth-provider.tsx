@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { User } from "@/lib/types"
 import { dataStore } from "@/lib/data-store"
+import { verifyPassword } from "@/lib/password-utils"
 
 interface AuthContextType {
   user: User | null
@@ -38,17 +39,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    console.log("[v0] Login attempt:", { email, password })
+    console.log("[v0] Login attempt:", { email })
 
-    // Simple authentication - in real app, this would be server-side
     const users = dataStore.getUsers()
     console.log("[v0] Available users:", users)
 
     const foundUser = users.find((u) => u.email === email)
     console.log("[v0] Found user:", foundUser)
 
-    if (foundUser && password === "password123") {
-      // Demo password
+    if (foundUser && foundUser.passwordHash && verifyPassword(password, foundUser.passwordHash)) {
       console.log("[v0] Login successful")
       setUser(foundUser)
       dataStore.setCurrentUser(foundUser)

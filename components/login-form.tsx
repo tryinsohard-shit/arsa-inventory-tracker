@@ -96,7 +96,7 @@ export function LoginForm() {
                 <strong>Staff:</strong> staff1@clientname.com
               </p>
               <p>
-                <strong>Password:</strong> password123
+                <strong>Password:</strong> (set by admin)
               </p>
             </div>
           </div>

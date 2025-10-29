@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Package, ClipboardList, BarChart3, Search, LogOut } from "lucide-react"
+import { Package, ClipboardList, BarChart3, Search, LogOut, Users } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { useAuth } from "@/components/auth-provider"
 import { LoginForm } from "@/components/login-form"
@@ -12,9 +12,14 @@ import { InventoryView } from "@/components/inventory-view"
 import { RequestsView } from "@/components/requests-view"
 import { AdminDashboard } from "@/components/admin-dashboard"
 import { ReportsView } from "@/components/reports-view"
+import { DepartmentManagement } from "@/components/department-management"
+import { UserManagement } from "@/components/user-management"
+import { DepartmentUserManagement } from "@/components/department-user-management"
 
 export default function HomePage() {
-  const [currentView, setCurrentView] = useState<"dashboard" | "inventory" | "requests" | "reports">("dashboard")
+  const [currentView, setCurrentView] = useState<
+    "dashboard" | "inventory" | "requests" | "reports" | "departments" | "users" | "dept-users"
+  >("dashboard")
   const { user: currentUser, logout, isLoading } = useAuth()
   const stats = dataStore.getDashboardStats()
 
@@ -66,7 +71,7 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-6">
         {/* Navigation */}
         <nav className="mb-8">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               variant={currentView === "dashboard" ? "default" : "outline"}
               onClick={() => setCurrentView("dashboard")}
@@ -91,20 +96,48 @@ export default function HomePage() {
               <ClipboardList className="h-4 w-4" />
               Requests
             </Button>
-            {currentUser.role === "admin" && (
+            {currentUser.role === "manager" && (
               <Button
-                variant={currentView === "reports" ? "default" : "outline"}
-                onClick={() => setCurrentView("reports")}
+                variant={currentView === "dept-users" ? "default" : "outline"}
+                onClick={() => setCurrentView("dept-users")}
                 className="flex items-center gap-2"
               >
-                <BarChart3 className="h-4 w-4" />
-                Reports
+                <Users className="h-4 w-4" />
+                Department Users
               </Button>
+            )}
+            {currentUser.role === "admin" && (
+              <>
+                <Button
+                  variant={currentView === "reports" ? "default" : "outline"}
+                  onClick={() => setCurrentView("reports")}
+                  className="flex items-center gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Reports
+                </Button>
+                <Button
+                  variant={currentView === "departments" ? "default" : "outline"}
+                  onClick={() => setCurrentView("departments")}
+                  className="flex items-center gap-2"
+                >
+                  <Package className="h-4 w-4" />
+                  Departments
+                </Button>
+                <Button
+                  variant={currentView === "users" ? "default" : "outline"}
+                  onClick={() => setCurrentView("users")}
+                  className="flex items-center gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  Users
+                </Button>
+              </>
             )}
           </div>
         </nav>
 
-        {/* Dashboard View - Enhanced for Admins */}
+        {/* Views */}
         {currentView === "dashboard" && (
           <>
             {currentUser.role === "admin" ? (
@@ -191,6 +224,11 @@ export default function HomePage() {
         {currentView === "inventory" && <InventoryView />}
         {currentView === "requests" && <RequestsView />}
         {currentView === "reports" && <ReportsView />}
+        {currentView === "departments" && currentUser.role === "admin" && <DepartmentManagement />}
+        {currentView === "users" && currentUser.role === "admin" && <UserManagement />}
+        {currentView === "dept-users" && currentUser.role === "manager" && (
+          <DepartmentUserManagement currentUser={currentUser} />
+        )}
       </div>
     </div>
   )

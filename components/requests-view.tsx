@@ -32,6 +32,7 @@ import {
   CheckCircle,
   XCircle,
   RotateCcw,
+  Building2,
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { useAuth } from "./auth-provider"
@@ -60,26 +61,41 @@ export function RequestsView() {
   const [requests, setRequests] = useState(dataStore.getRequests())
   const [items] = useState(dataStore.getItems())
   const [users] = useState(dataStore.getUsers())
+  const [departments] = useState(dataStore.getDepartments())
+  const [subDepartments] = useState(dataStore.getSubDepartments())
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isNewRequestOpen, setIsNewRequestOpen] = useState(false)
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false)
   const [returningRequest, setReturningRequest] = useState<BorrowRequest | null>(null)
+
+  const availableItems = items.filter((item) => item.status === "available")
+  const defaultItemId =
+    availableItems.length > 0 ? availableItems[0].id : items.length > 0 ? items[0].id : "placeholder"
+  const defaultDepartmentId = user?.departmentId || (departments.length > 0 ? departments[0].id : "placeholder")
+
   const [formData, setFormData] = useState({
-    itemId: "",
+    itemId: defaultItemId,
     expectedReturnDate: "",
     purpose: "",
+    departmentId: defaultDepartmentId,
+    subDepartmentId: "",
   })
   const [returnCondition, setReturnCondition] = useState<"excellent" | "good" | "fair" | "poor">("excellent")
   const [error, setError] = useState("")
 
-  const availableItems = items.filter((item) => item.status === "available")
+  const selectedDeptSubDepts =
+    formData.departmentId && formData.departmentId !== "" && formData.departmentId !== "placeholder"
+      ? subDepartments.filter((sd) => sd.departmentId === formData.departmentId)
+      : []
 
   const enrichedRequests = useMemo(() => {
     return requests.map((request) => {
       const item = items.find((i) => i.id === request.itemId)
       const borrower = users.find((u) => u.id === request.borrowerId)
       const approver = request.approvedBy ? users.find((u) => u.id === request.approvedBy) : null
+      const dept = request.departmentId ? departments.find((d) => d.id === request.departmentId) : null
+      const subDept = request.subDepartmentId ? subDepartments.find((sd) => sd.id === request.subDepartmentId) : null
       const isOverdue = request.status === "active" && new Date() > request.expectedReturnDate
 
       return {
@@ -87,10 +103,12 @@ export function RequestsView() {
         item,
         borrower,
         approver,
+        dept,
+        subDept,
         displayStatus: isOverdue ? "overdue" : request.status,
       }
     })
-  }, [requests, items, users])
+  }, [requests, items, users, departments, subDepartments])
 
   const filteredRequests = useMemo(() => {
     let filtered = enrichedRequests
@@ -106,7 +124,9 @@ export function RequestsView() {
         (req) =>
           req.item?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           req.borrower?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.purpose.toLowerCase().includes(searchTerm.toLowerCase()),
+          req.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.dept?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.subDept?.name.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
 
@@ -120,9 +140,11 @@ export function RequestsView() {
 
   const resetForm = () => {
     setFormData({
-      itemId: "",
+      itemId: defaultItemId,
       expectedReturnDate: "",
       purpose: "",
+      departmentId: defaultDepartmentId,
+      subDepartmentId: "",
     })
     setError("")
   }
@@ -131,7 +153,14 @@ export function RequestsView() {
     e.preventDefault()
     setError("")
 
-    if (!formData.itemId || !formData.expectedReturnDate || !formData.purpose) {
+    if (
+      !formData.itemId ||
+      !formData.expectedReturnDate ||
+      !formData.purpose ||
+      !formData.departmentId ||
+      formData.itemId === "placeholder" ||
+      formData.departmentId === "placeholder"
+    ) {
       setError("Please fill in all required fields")
       return
     }
@@ -148,6 +177,8 @@ export function RequestsView() {
       dataStore.addRequest({
         itemId: formData.itemId,
         borrowerId: user.id,
+        departmentId: formData.departmentId,
+        subDepartmentId: formData.subDepartmentId || undefined,
         requestedDate: new Date(),
         expectedReturnDate: expectedDate,
         status: "pending",
@@ -240,6 +271,49 @@ export function RequestsView() {
                 <DialogDescription>Submit a request to borrow an inventory item.</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmitRequest} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department *</Label>
+                  <Select
+                    value={formData.departmentId}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, departmentId: value, subDepartmentId: "" }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.departmentId && formData.departmentId !== "" && formData.departmentId !== "placeholder" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="subDepartment">Sub-Department</Label>
+                    <Select
+                      value={formData.subDepartmentId}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, subDepartmentId: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sub-department (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {selectedDeptSubDepts.map((subDept) => (
+                          <SelectItem key={subDept.id} value={subDept.id}>
+                            {subDept.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="item">Item *</Label>
                   <Select
@@ -376,6 +450,15 @@ export function RequestsView() {
                         <strong>Borrower:</strong> {request.borrower?.name}
                       </span>
                     </div>
+                    {request.dept && (
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          <strong>Department:</strong> {request.dept.name}
+                          {request.subDept && ` - ${request.subDept.name}`}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>
