@@ -1,4 +1,4 @@
-# 🚀 Setup Guide - ARSA Inventory Tracker
+# 🚀 Setup Guide - ARSA Inventory Trackerr
 
 ## 📋 Prerequisites
 
