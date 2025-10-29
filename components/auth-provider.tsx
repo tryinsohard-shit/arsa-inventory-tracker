@@ -36,10 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true)
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
     console.log("[v0] Login attempt:", { email })
+
+    // Try to load users from Supabase first
+    await dataStore.loadUsersFromSupabase()
 
     const users = dataStore.getUsers()
     console.log("[v0] Available users:", users)

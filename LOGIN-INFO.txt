@@ -1,0 +1,76 @@
+╔═══════════════════════════════════════════════════════════════╗
+║         ARSA INVENTORY TRACKER - LOGIN CREDENTIALS            ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🌐 URL: http://localhost:3000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 ADMIN ACCOUNT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email    : adminarsa@clientname.com
+Password : password
+Role     : Administrator
+Access   : Full system access
+
+Features:
+  ✓ User Management
+  ✓ Department Management
+  ✓ Inventory Management
+  ✓ Approve/Reject Requests
+  ✓ Reports & Analytics
+  ✓ System Settings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 STAFF ACCOUNT #1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email    : staff1@clientname.com
+Password : password
+Role     : Staff
+Dept     : Operations - Logistics
+Access   : Limited
+
+Features:
+  ✓ View Inventory
+  ✓ Submit Borrow Requests
+  ✓ View Own Requests
+  ✓ Dashboard
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 STAFF ACCOUNT #2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email    : staff2@clientname.com
+Password : password
+Role     : Staff
+Dept     : Finance - Accounting
+Access   : Limited
+
+Features:
+  ✓ View Inventory
+  ✓ Submit Borrow Requests
+  ✓ View Own Requests
+  ✓ Dashboard
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  IMPORTANT NOTES:
+
+1. Default password untuk semua akun: "password"
+2. Ganti password setelah login pertama kali
+3. Untuk production, gunakan password yang lebih kuat
+4. Password hash saat ini menggunakan implementasi sederhana
+   Untuk production, upgrade ke bcrypt
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 QUICK START:
+
+1. Buka browser: http://localhost:3000
+2. Login dengan salah satu akun di atas
+3. Explore fitur-fitur yang tersedia
+4. Untuk menambah user baru, login sebagai Admin
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+

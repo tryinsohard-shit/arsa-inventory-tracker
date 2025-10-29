@@ -83,6 +83,7 @@ export const mockUsers: User[] = [
     department: "IT",
     departmentId: "dept-1",
     subDepartmentId: "subdept-1",
+    passwordHash: "5f4dcc3b5aa765d61d8327deb882cf99", // password: "password"
     createdAt: new Date("2024-01-01"),
   },
   {
@@ -93,6 +94,7 @@ export const mockUsers: User[] = [
     department: "Operations",
     departmentId: "dept-2",
     subDepartmentId: "subdept-3",
+    passwordHash: "5f4dcc3b5aa765d61d8327deb882cf99", // password: "password"
     createdAt: new Date("2024-01-15"),
   },
   {
@@ -103,6 +105,7 @@ export const mockUsers: User[] = [
     department: "Finance",
     departmentId: "dept-3",
     subDepartmentId: "subdept-4",
+    passwordHash: "5f4dcc3b5aa765d61d8327deb882cf99", // password: "password"
     createdAt: new Date("2024-02-01"),
   },
 ]

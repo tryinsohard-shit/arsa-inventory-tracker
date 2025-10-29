@@ -33,6 +33,31 @@ class DataStore {
     return this.users.find((user) => user.email === email)
   }
 
+  async loadUsersFromSupabase(): Promise<void> {
+    try {
+      const { data: users, error } = await supabase.from("users").select("*")
+
+      if (error) throw error
+
+      if (users && users.length > 0) {
+        this.users = users.map((user: any) => ({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          departmentId: user.department_id,
+          subDepartmentId: user.sub_department_id,
+          passwordHash: user.password_hash,
+          createdAt: new Date(user.created_at),
+        }))
+        console.log("[v0] Loaded", this.users.length, "users from Supabase")
+      }
+    } catch (error) {
+      console.error("[v0] Error loading users from Supabase:", error)
+      console.log("[v0] Using mock users instead")
+    }
+  }
+
   addUser(user: Omit<User, "id" | "createdAt" | "passwordHash">): User {
     const newUser: User = {
       ...user,
