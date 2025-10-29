@@ -25,3 +25,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database dumps and backups
+*.sql.backup
+*.sql.dump
+*.db
+*.sqlite
+*.sqlite3
+
+# exclude all SQL files except migration scripts
+*.sql
+!scripts/*.sql
