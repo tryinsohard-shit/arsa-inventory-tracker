@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Plus, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { useDepartments } from "@/hooks/use-departments"
+import { useAlertDialog } from "@/components/ui/alert-dialog"
 
 export function DepartmentManagement() {
+  const { confirm: confirmDialog } = useAlertDialog()
   const {
     departments,
     subDepartments,
@@ -67,7 +69,8 @@ export function DepartmentManagement() {
   }
 
   const handleDeleteDepartment = async (id: string) => {
-    if (confirm("Are you sure you want to delete this department and all its sub-departments?")) {
+    const confirmed = await confirmDialog("Are you sure you want to delete this department and all its sub-departments?", "Delete Department")
+    if (confirmed) {
       setIsSubmitting(true)
       try {
         await deleteDepartment(id)
@@ -80,7 +83,8 @@ export function DepartmentManagement() {
   }
 
   const handleDeleteSubDepartment = async (id: string) => {
-    if (confirm("Are you sure you want to delete this sub-department?")) {
+    const confirmed = await confirmDialog("Are you sure you want to delete this sub-department?", "Delete Sub-Department")
+    if (confirmed) {
       setIsSubmitting(true)
       try {
         await deleteSubDepartment(id)

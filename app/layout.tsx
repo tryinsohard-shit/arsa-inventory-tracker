@@ -4,10 +4,11 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { AuthProvider } from "@/components/auth-provider"
+import { AlertDialogProvider } from "@/components/ui/alert-dialog"
 
 export const metadata: Metadata = {
-  title: "Inventory System",
-  description: "Asset & Loan Management System",
+  title: "Indomaret Inventory System",
+  description: "Indomaret Asset & Loan Management System - Internal Application",
     generator: 'v0.app'
 }
 
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AlertDialogProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </AlertDialogProvider>
       </body>
     </html>
   )

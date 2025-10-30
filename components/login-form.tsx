@@ -34,13 +34,17 @@ export function LoginForm() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md shadow-lg border border-border">
+        <CardHeader className="text-center border-b">
           <div className="flex justify-center mb-4">
-            <Package className="h-12 w-12 text-primary" />
+            <div className="bg-white rounded-lg p-2 shadow-sm">
+              <img src="/logo-indomaret.png" alt="Indomaret" className="h-12 w-auto" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Inventory System</CardTitle>
-          <CardDescription>Sign in to access your account</CardDescription>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Indomaret Inventory
+          </CardTitle>
+          <CardDescription className="text-base mt-2">Asset & Loan Management System</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -40,26 +40,36 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
+      {/* Header - Indomaret Themed */}
+      <header className="border-b bg-primary shadow-sm">
+        <div className="container mx-auto px-4 py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Package className="h-8 w-8 text-primary" />
+            {/* Logo & Title */}
+            <div className="flex items-center gap-4">
+              <div className="bg-white rounded-lg p-1.5 shadow-sm">
+                <img src="/logo-indomaret.png" alt="Indomaret" className="h-8 w-auto" />
+              </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Inventory System</h1>
-                <p className="text-sm text-muted-foreground">Asset & Loan Management</p>
+                <h1 className="text-2xl font-bold text-primary-foreground">Indomaret Inventory</h1>
+                <p className="text-sm text-primary-foreground/80">Asset & Loan Management System</p>
               </div>
             </div>
+            
+            {/* User Info */}
             <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="capitalize">
+              <Badge variant="secondary" className="capitalize bg-accent text-accent-foreground hover:bg-accent/90">
                 {currentUser.role}
               </Badge>
-              <div className="text-right">
+              <div className="text-right text-primary-foreground">
                 <p className="text-sm font-medium">{currentUser.name}</p>
-                <p className="text-xs text-muted-foreground">{currentUser.department}</p>
+                <p className="text-xs opacity-80">{currentUser.department}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={logout} className="flex items-center gap-2 bg-transparent">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={logout} 
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-primary-foreground border-primary-foreground/30"
+              >
                 <LogOut className="h-4 w-4" />
                 Logout
               </Button>

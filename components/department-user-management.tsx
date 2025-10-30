@@ -18,6 +18,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trash2, Edit2, Plus, Mail, UserIcon, Key } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
+import { useDepartments } from "@/hooks/use-departments"
+import { useAlertDialog } from "@/components/ui/alert-dialog"
 import { dataStore } from "@/lib/data-store"
 import { generateTemporaryPassword } from "@/lib/password-utils"
 import type { User } from "@/lib/types"
@@ -27,7 +29,9 @@ interface DepartmentUserManagementProps {
 }
 
 export function DepartmentUserManagement({ currentUser }: DepartmentUserManagementProps) {
-  const { users, isLoading, error, addUser, updateUser, deleteUser } = useUsers()
+  const { alert: alertDialog, confirm: confirmDialog, success: successDialog } = useAlertDialog()
+  const { users, addUser, updateUser, deleteUser } = useUsers()
+  const { departments, subDepartments: allSubDepartments } = useDepartments()
   const [isOpen, setIsOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [showPasswordReset, setShowPasswordReset] = useState<string | null>(null)
@@ -44,7 +48,6 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
     subDepartmentId: "",
   })
 
-  const departments = dataStore.getDepartments()
   const subDepartments = dataStore.getSubDepartments(currentUser.departmentId || "")
 
   // Manager can only see/manage staff and viewers in their department, NOT admins or other managers
@@ -91,7 +94,7 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
     e.preventDefault()
 
     if (!formData.email || !formData.name) {
-      alert("Please fill in all required fields")
+      await alertDialog("Please fill in all required fields", "Missing Fields")
       return
     }
 
@@ -125,22 +128,23 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
 
   const handlePasswordReset = async (userId: string) => {
     if (!newPassword) {
-      alert("Please enter a new password")
+      await alertDialog("Please enter a new password", "Password Required")
       return
     }
 
     const success = await dataStore.setUserPassword(userId, newPassword)
     if (success) {
-      alert("Password reset successfully!")
+      await successDialog("Password reset successfully!", "Password Updated")
       setShowPasswordReset(null)
       setNewPassword("")
     } else {
-      alert("Failed to reset password. Please try again.")
+      await alertDialog("Failed to reset password. Please try again.", "Error")
     }
   }
 
   const handleDelete = async (userId: string) => {
-    if (confirm("Are you sure you want to delete this user?")) {
+    const confirmed = await confirmDialog("Are you sure you want to delete this user?", "Delete User")
+    if (confirmed) {
       try {
         await deleteUser(userId)
       } catch (err) {
@@ -249,8 +253,8 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
               )}
 
               <div className="flex gap-3 pt-4">
-                <Button type="submit" disabled={isLoading} className="flex-1">
-                  {isLoading ? "Saving..." : editingUser ? "Update User" : "Create User"}
+                <Button type="submit" disabled={false} className="flex-1">
+                  {editingUser ? "Update User" : "Create User"}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleCloseDialog} className="flex-1 bg-transparent">
                   Cancel
@@ -260,14 +264,6 @@ export function DepartmentUserManagement({ currentUser }: DepartmentUserManageme
           </DialogContent>
         </Dialog>
       </div>
-
-      {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <p className="text-red-800">{error}</p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Users Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -149,7 +149,7 @@ export function RequestsView() {
     setError("")
   }
 
-  const handleSubmitRequest = (e: React.FormEvent) => {
+  const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -174,7 +174,7 @@ export function RequestsView() {
     }
 
     try {
-      dataStore.addRequest({
+      await dataStore.addRequest({
         itemId: formData.itemId,
         borrowerId: user.id,
         departmentId: formData.departmentId,
@@ -192,29 +192,29 @@ export function RequestsView() {
     }
   }
 
-  const handleApproveRequest = (requestId: string) => {
+  const handleApproveRequest = async (requestId: string) => {
     if (!user) return
 
     const request = dataStore.getRequestById(requestId)
     if (!request) return
 
     // Update request status
-    dataStore.updateRequest(requestId, {
+    await dataStore.updateRequest(requestId, {
       status: "active",
       approvedBy: user.id,
       approvedAt: new Date(),
     })
 
     // Update item status
-    dataStore.updateItem(request.itemId, { status: "borrowed" })
+    await dataStore.updateItem(request.itemId, { status: "borrowed" })
 
     setRequests(dataStore.getRequests())
   }
 
-  const handleRejectRequest = (requestId: string) => {
+  const handleRejectRequest = async (requestId: string) => {
     if (!user) return
 
-    dataStore.updateRequest(requestId, {
+    await dataStore.updateRequest(requestId, {
       status: "rejected",
       approvedBy: user.id,
       approvedAt: new Date(),
@@ -223,18 +223,18 @@ export function RequestsView() {
     setRequests(dataStore.getRequests())
   }
 
-  const handleReturnItem = () => {
+  const handleReturnItem = async () => {
     if (!returningRequest || !user) return
 
     // Update request
-    dataStore.updateRequest(returningRequest.id, {
+    await dataStore.updateRequest(returningRequest.id, {
       status: "returned",
       actualReturnDate: new Date(),
       returnCondition,
     })
 
     // Update item status and condition
-    dataStore.updateItem(returningRequest.itemId, {
+    await dataStore.updateItem(returningRequest.itemId, {
       status: "available",
       condition: returnCondition,
     })

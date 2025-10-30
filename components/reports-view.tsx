@@ -20,12 +20,14 @@ import {
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { useAuth } from "./auth-provider"
+import { useAlertDialog } from "@/components/ui/alert-dialog"
 
 type ReportType = "inventory" | "usage" | "financial" | "activity"
 type DateRange = "week" | "month" | "quarter" | "year"
 
 export function ReportsView() {
   const { user } = useAuth()
+  const { info: infoDialog } = useAlertDialog()
   const [reportType, setReportType] = useState<ReportType>("inventory")
   const [dateRange, setDateRange] = useState<DateRange>("month")
 
@@ -152,8 +154,9 @@ export function ReportsView() {
   const handleExport = (format: "csv" | "pdf") => {
     // Simulate export functionality
     const filename = `${reportType}_report_${dateRange}.${format}`
-    alert(
-      `Exporting ${filename}...\n\nIn a real application, this would generate and download the ${format.toUpperCase()} file.`,
+    infoDialog(
+      `In a real application, this would generate and download the ${format.toUpperCase()} file.`,
+      `Exporting ${filename}...`
     )
   }
 

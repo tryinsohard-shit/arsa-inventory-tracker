@@ -21,12 +21,14 @@ import { Trash2, Edit2, Plus, Mail, UserIcon, Key } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
 import { useDepartments } from "@/hooks/use-departments"
 import { dataStore } from "@/lib/data-store"
+import { useAlertDialog } from "@/components/ui/alert-dialog"
 import { generateTemporaryPassword } from "@/lib/password-utils"
 import type { User } from "@/lib/types"
 
 export function UserManagement() {
   const { users, isLoading, error, addUser, updateUser, deleteUser } = useUsers()
   const { departments, subDepartments: allSubDepartments } = useDepartments()
+  const { alert: alertDialog, confirm: confirmDialog, success: successDialog } = useAlertDialog()
   const [isOpen, setIsOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [showPasswordReset, setShowPasswordReset] = useState<string | null>(null)
@@ -91,12 +93,12 @@ export function UserManagement() {
     e.preventDefault()
 
     if (!formData.email || !formData.name || !formData.departmentId) {
-      alert("Please fill in all required fields")
+      await alertDialog("Please fill in all required fields", "Missing Fields")
       return
     }
 
     if (!editingUser && !formData.password) {
-      alert("Please set a password for the new user")
+      await alertDialog("Please set a password for the new user", "Password Required")
       return
     }
 
@@ -132,22 +134,23 @@ export function UserManagement() {
 
   const handlePasswordReset = async (userId: string) => {
     if (!newPassword) {
-      alert("Please enter a new password")
+      await alertDialog("Please enter a new password", "Password Required")
       return
     }
 
     const success = await dataStore.setUserPassword(userId, newPassword)
     if (success) {
-      alert("Password reset successfully!")
+      await successDialog("Password reset successfully!", "Password Updated")
       setShowPasswordReset(null)
       setNewPassword("")
     } else {
-      alert("Failed to reset password. Please try again.")
+      await alertDialog("Failed to reset password. Please try again.", "Error")
     }
   }
 
   const handleDelete = async (userId: string) => {
-    if (confirm("Are you sure you want to delete this user?")) {
+    const confirmed = await confirmDialog("Are you sure you want to delete this user?", "Delete User")
+    if (confirmed) {
       try {
         await deleteUser(userId)
       } catch (err) {

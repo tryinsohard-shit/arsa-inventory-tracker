@@ -36,6 +36,7 @@ import {
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { useAuth } from "./auth-provider"
+import { useAlertDialog } from "@/components/ui/alert-dialog"
 import type { InventoryItem } from "@/lib/types"
 
 const statusColors = {
@@ -61,6 +62,7 @@ const statusIcons = {
 
 export function InventoryView() {
   const { user } = useAuth()
+  const { confirm: confirmDialog } = useAlertDialog()
   const [items, setItems] = useState(dataStore.getItems())
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
@@ -112,7 +114,7 @@ export function InventoryView() {
     setEditingItem(null)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -123,7 +125,7 @@ export function InventoryView() {
 
     try {
       if (editingItem) {
-        const updatedItem = dataStore.updateItem(editingItem.id, {
+        const updatedItem = await dataStore.updateItem(editingItem.id, {
           ...formData,
           purchasePrice: formData.purchasePrice ? Number.parseFloat(formData.purchasePrice) : undefined,
         })
@@ -133,7 +135,7 @@ export function InventoryView() {
           resetForm()
         }
       } else {
-        const newItem = dataStore.addItem({
+        const newItem = await dataStore.addItem({
           ...formData,
           purchasePrice: formData.purchasePrice ? Number.parseFloat(formData.purchasePrice) : undefined,
         })
@@ -161,9 +163,10 @@ export function InventoryView() {
     setIsAddDialogOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      dataStore.deleteItem(id)
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirmDialog("Are you sure you want to delete this item?", "Delete Item")
+    if (confirmed) {
+      await dataStore.deleteItem(id)
       setItems(dataStore.getItems())
     }
   }
@@ -368,25 +371,29 @@ export function InventoryView() {
         {filteredItems.map((item) => {
           const StatusIcon = statusIcons[item.status]
           return (
-            <Card key={item.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <CardDescription className="mt-1">{item.description}</CardDescription>
+            <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow border border-border">
+              {/* Header */}
+              <CardHeader className="pb-3 border-b">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg font-semibold text-foreground">{item.name}</CardTitle>
+                    <CardDescription className="mt-2 text-sm">{item.description}</CardDescription>
                   </div>
-                  <StatusIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 ml-2" />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+
+              <CardContent className="space-y-4 pt-4">
+                {/* Status Badges */}
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className={statusColors[item.status]}>
+                  <Badge className="bg-primary text-primary-foreground capitalize text-xs font-medium px-3">
                     {item.status}
                   </Badge>
-                  <Badge variant="secondary" className={conditionColors[item.condition]}>
+                  <Badge variant="outline" className="capitalize text-xs font-medium px-3">
                     {item.condition}
                   </Badge>
-                  <Badge variant="outline">{item.category}</Badge>
+                  <Badge variant="outline" className="capitalize text-xs font-medium px-3">
+                    {item.category}
+                  </Badge>
                 </div>
 
                 <div className="space-y-2 text-sm text-muted-foreground">
