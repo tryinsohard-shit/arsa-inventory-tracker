@@ -1,4 +1,4 @@
-# PUSH DEPLOY TO VERCEL
+# JUST EDITED FROM AKSALATDEV
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
