@@ -19,18 +19,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for stored session
-    const storedUser = localStorage.getItem("inventory-user")
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser)
-        setUser(userData)
-        dataStore.setCurrentUser(userData)
-      } catch (error) {
-        localStorage.removeItem("inventory-user")
+    const initializeData = async () => {
+      // Check for stored session
+      const storedUser = localStorage.getItem("inventory-user")
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser)
+          setUser(userData)
+          dataStore.setCurrentUser(userData)
+          
+          // Load all data from Supabase
+          await Promise.all([
+            dataStore.loadUsersFromSupabase().catch(console.error),
+            dataStore.loadDepartmentsFromSupabase().catch(console.error),
+            dataStore.loadInventoryFromSupabase().catch(console.error),
+            dataStore.loadBorrowRequestsFromSupabase().catch(console.error),
+          ])
+        } catch (error) {
+          localStorage.removeItem("inventory-user")
+        }
       }
+      setIsLoading(false)
     }
-    setIsLoading(false)
+    
+    initializeData()
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -38,8 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     console.log("[v0] Login attempt:", { email })
 
-    // Try to load users from Supabase first
-    await dataStore.loadUsersFromSupabase()
+    // Load all data from Supabase
+    await Promise.all([
+      dataStore.loadUsersFromSupabase(),
+      dataStore.loadDepartmentsFromSupabase(),
+      dataStore.loadInventoryFromSupabase(),
+      dataStore.loadBorrowRequestsFromSupabase(),
+    ])
 
     const users = dataStore.getUsers()
     console.log("[v0] Available users:", users)

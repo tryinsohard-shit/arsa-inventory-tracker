@@ -16,11 +16,10 @@ export interface InventoryItem {
   description: string
   category: string
   serialNumber?: string
-  condition: "excellent" | "good" | "fair" | "poor"
   status: "available" | "borrowed" | "maintenance" | "retired"
   location: string
   purchaseDate?: Date
-  purchasePrice?: number
+  value?: number
   createdAt: Date
   updatedAt: Date
 }
@@ -28,18 +27,16 @@ export interface InventoryItem {
 export interface BorrowRequest {
   id: string
   itemId: string
-  borrowerId: string
-  departmentId?: string
+  userId: string
+  departmentId: string
   subDepartmentId?: string
-  requestedDate: Date
+  borrowDate?: Date
   expectedReturnDate: Date
   actualReturnDate?: Date
-  status: "pending" | "approved" | "rejected" | "active" | "returned" | "overdue"
-  purpose: string
-  approvedBy?: string
-  approvedAt?: Date
+  status: "pending" | "approved" | "rejected" | "borrowed" | "returned"
+  purpose?: string
   notes?: string
-  returnCondition?: "excellent" | "good" | "fair" | "poor"
+  returnCondition?: "good" | "fair" | "damaged"
   createdAt: Date
   updatedAt: Date
 }
