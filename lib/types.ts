@@ -20,6 +20,8 @@ export interface InventoryItem {
   location: string
   purchaseDate?: Date
   value?: number
+  photo_url?: string
+  photo_file_id?: string // Added to store the ImageKit file ID for deletion
   createdAt: Date
   updatedAt: Date
 }
@@ -76,3 +78,4 @@ export interface SubDepartment {
   createdAt: Date
   updatedAt: Date
 }
+

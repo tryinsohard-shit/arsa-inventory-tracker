@@ -198,6 +198,8 @@ class DataStore {
         location: item.location,
         purchaseDate: item.purchase_date ? new Date(item.purchase_date) : undefined,
         value: item.value,
+        photo_url: item.photo_url,
+        photo_file_id: item.photo_file_id,
         createdAt: new Date(item.created_at),
         updatedAt: new Date(item.updated_at),
       }))
@@ -214,20 +216,24 @@ class DataStore {
   }
 
   async addItem(item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">): Promise<InventoryItem> {
+    // Create the base insert object
+    const insertObj: any = {
+      name: item.name,
+      description: item.description,
+      category: item.category,
+      status: item.status,
+      location: item.location,
+    };
+
+    // Add optional fields only if they have values
+    if (item.serialNumber) insertObj.serial_number = item.serialNumber;
+    if (item.purchaseDate) insertObj.purchase_date = item.purchaseDate;
+    if (item.value !== undefined && item.value !== null) insertObj.value = item.value;
+    if (item.photo_url) insertObj.photo_url = item.photo_url; // Only include if photo_url exists and is not empty
+
     const { data, error } = await supabase
       .from("inventory_items")
-      .insert([
-        {
-          name: item.name,
-          description: item.description,
-          category: item.category,
-          serial_number: item.serialNumber,
-          status: item.status,
-          location: item.location,
-          purchase_date: item.purchaseDate,
-          value: item.value,
-        },
-      ])
+      .insert([insertObj])
       .select()
 
     if (error) {
@@ -246,6 +252,8 @@ class DataStore {
         location: data[0].location,
         purchaseDate: data[0].purchase_date ? new Date(data[0].purchase_date) : undefined,
         value: data[0].value,
+        photo_url: data[0].photo_url,
+        photo_file_id: data[0].photo_file_id,
         createdAt: new Date(data[0].created_at),
         updatedAt: new Date(data[0].updated_at),
       }
@@ -267,6 +275,8 @@ class DataStore {
     if (updates.location !== undefined) supabaseUpdates.location = updates.location
     if (updates.purchaseDate !== undefined) supabaseUpdates.purchase_date = updates.purchaseDate
     if (updates.value !== undefined) supabaseUpdates.value = updates.value
+    if (updates.photo_url !== undefined) supabaseUpdates.photo_url = updates.photo_url
+    if (updates.photo_file_id !== undefined) supabaseUpdates.photo_file_id = updates.photo_file_id
     supabaseUpdates.updated_at = new Date().toISOString()
 
     const { error } = await supabase.from("inventory_items").update(supabaseUpdates).eq("id", id)
@@ -290,6 +300,9 @@ class DataStore {
   }
 
   async deleteItem(id: string): Promise<boolean> {
+    // Get the item first to access its photo_url
+    const itemToDelete = this.items.find((item) => item.id === id);
+    
     const { error } = await supabase.from("inventory_items").delete().eq("id", id)
 
     if (error) {
@@ -302,6 +315,13 @@ class DataStore {
       this.items.splice(index, 1)
       this.addAuditLog("item", id, "deleted", {})
     }
+    
+    // Delete photo from storage if it existed
+    if (itemToDelete?.photo_url) {
+      // We'll import and use the photo deletion function in the component
+      // since data store shouldn't depend on storage operations directly
+    }
+    
     return true
   }
 
